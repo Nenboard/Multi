@@ -1,0 +1,81 @@
+<html>
+<head>
+    <style>
+        body {
+            margin: 0px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="1000" height="500">
+
+    </canvas>
+
+    <script>
+        var prev;
+        var position;
+
+        function load()
+        {
+            canvas = document.getElementById("canvas")
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight; 
+        }
+
+        var click = false;
+        document.body.onmousedown = function()
+        {
+            click = true;
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "!" + event.x+"@"+event.y, true);
+            xhr.send();
+        }
+        document.body.onmouseup = function()
+        {
+            click = false;
+        }
+
+        function draw(x1, y1, x2, y2)
+        {
+            const canvas = document.querySelector("#canvas");
+            const ctx = canvas.getContext("2d");
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        }
+
+        function get(event)
+        {
+            prev = position
+            position = event.x+"@"+event.y;
+            if (click)
+            {
+                draw(prev.split("@")[0], prev.split("@")[1], position.split("@")[0], position.split("@")[1]);
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", position, true);
+                xhr.send();
+            }
+        }
+
+        let throttle = (func, delay) =>
+        {
+            let prev = Date.now() - delay;
+            return (...args) =>
+            {
+                let current = Date.now();
+                if (current - prev >= delay)
+                {
+                    prev = current;
+                    func.apply(null, args);
+                }
+            }
+        };
+
+        window.onload = load;
+        document.addEventListener("mousemove", throttle(get, 100));
+    </script>
+</body>
+</html>
